@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import com.m2dl.sheraf.R;
-import com.m2dl.sheraf.TypePins;
+import com.m2dl.sheraf.enums.TypePins;
 
 /**
  * Created by Clement on 17/03/2017.
@@ -43,5 +43,9 @@ public class Pins extends DynamicElement {
         if (fps != 0) {
             setxPosition(getxPosition() + (getxSpeed() / fps));
         }
+    }
+
+    public TypePins getType() {
+        return typePins;
     }
 }
