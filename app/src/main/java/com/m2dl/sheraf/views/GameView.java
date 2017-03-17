@@ -6,14 +6,16 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.m2dl.sheraf.ObstacleSize;
 import com.m2dl.sheraf.R;
 import com.m2dl.sheraf.dynamics.elements.Background;
+import com.m2dl.sheraf.dynamics.elements.Player;
+import com.m2dl.sheraf.enums.LightValue;
 import com.m2dl.sheraf.dynamics.elements.Obstacle;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -28,9 +30,10 @@ public class GameView extends SurfaceView implements  Runnable {
     private SurfaceHolder ourHolder;
     private volatile boolean playing;
     private float backgroundSpeed = -100;
-
+    private Player player;
     private Background background;
     private ArrayList<Obstacle> obstacles;
+    private LightValue lightValue;
 
     public GameView(Context context) {
         super(context);
@@ -116,5 +119,34 @@ public class GameView extends SurfaceView implements  Runnable {
         playing = true;
         gameThread = new Thread(this);
         gameThread.start();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent motionEvent) {
+
+        switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
+
+            // Player has touched the screen
+            case MotionEvent.ACTION_DOWN:
+
+                break;
+
+            // Player has removed finger from screen
+            case MotionEvent.ACTION_UP:
+                break;
+        }
+        return true;
+    }
+
+    public void onShake() {
+        //player.tryEatOuiche();
+    }
+
+    public void onShout() {
+        //player.setNervousBreakdown(true);
+    }
+
+    public void setLight(LightValue value) {
+        this.lightValue = value;
     }
 }
