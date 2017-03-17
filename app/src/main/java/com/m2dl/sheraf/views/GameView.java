@@ -207,15 +207,15 @@ public class GameView extends SurfaceView implements  Runnable {
         switch (lightValue) {
             case LOW :
                 nbUpdateBerforeGenerationObstacle = getRandomInt(75, 100);
-                obstacleSpeed = -2000;
+                obstacleSpeed = -1500;
                 break;
             case MEDIUM :
                 nbUpdateBerforeGenerationObstacle = getRandomInt(75, 100);
-                obstacleSpeed = -1500;
+                obstacleSpeed = -1000;
                 break;
             case HIGH :
                 nbUpdateBerforeGenerationObstacle = getRandomInt(75, 100);
-                obstacleSpeed = -1000;
+                obstacleSpeed = -750;
                 break;
         }
     }
