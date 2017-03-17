@@ -100,8 +100,6 @@ public class GameActivity extends Activity {
         });
 
         askPermission(android.Manifest.permission.RECORD_AUDIO, new String[]{android.Manifest.permission.RECORD_AUDIO}, 1);
-        mHandler = new Handler();
-        mHandler.postDelayed(soundUpdater, REFRESH_SOUND_DURATION);
     }
 
     private void askPermission(String sensor, String[] permissions, int requestCode) {
@@ -132,7 +130,11 @@ public class GameActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
+        try{
         soundMeter.startRecorder();
+        }catch(RuntimeException stopException){
+            //handle cleanup here
+        }
         // Add the following line to register the Session Manager Listener onResume
         mSensorManager.registerListener(mShakeDetector, mAccelerometer,	SensorManager.SENSOR_DELAY_UI);
         // Tell the gameView resume method to execute
@@ -173,6 +175,8 @@ public class GameActivity extends Activity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d("SON", "onRequestPermissionsResult: PERMISSION ACCORDEE");
+                    mHandler = new Handler();
+                    mHandler.postDelayed(soundUpdater, REFRESH_SOUND_DURATION);
 
                 } else {
                     Log.d("SON", "onRequestPermissionsResult: CAMERA PERMISSION REFUSEE");
