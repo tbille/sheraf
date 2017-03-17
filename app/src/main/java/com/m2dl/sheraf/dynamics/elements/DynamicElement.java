@@ -1,5 +1,6 @@
 package com.m2dl.sheraf.dynamics.elements;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -7,15 +8,32 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 
-public abstract class DynamicElement extends Drawable {
+public class DynamicElement extends Drawable {
 
+    protected final int screenWidth;
+    protected final int screenHeight;
     private Bitmap currentFrame;
     private float xPosition;
-    private float xSpeed;
     private float yPosition;
-    private float ySpeed;
+    private float xSpeed = 0;
+    private float ySpeed = 0;
+    protected Context context;
 
-    public static float groundHeight = 500f;
+    public static float groundHeight = 600f;
+
+    public DynamicElement(Context context, float xPosition, float yPosition) {
+        this.context = context;
+        this.screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+        this.screenHeight = context.getResources().getDisplayMetrics().heightPixels;
+        this.xPosition = xPosition;
+        this.yPosition = yPosition;
+    }
+
+    public DynamicElement(Context context) {
+        this.context = context;
+        this.screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+        this.screenHeight = context.getResources().getDisplayMetrics().heightPixels;
+    }
 
     @Override
     public void draw(Canvas canvas) {
@@ -24,7 +42,10 @@ public abstract class DynamicElement extends Drawable {
     }
 
     public void update(long fps){
-
+        if (fps != 0) {
+            setxPosition(getxPosition() + (getxSpeed() / fps));
+            setyPosition(getyPosition() + (getySpeed() / fps));
+        }
     }
 
     @Override
