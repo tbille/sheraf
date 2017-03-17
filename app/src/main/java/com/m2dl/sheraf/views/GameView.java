@@ -31,7 +31,7 @@ public class GameView extends SurfaceView implements  Runnable {
     private Thread gameThread = null;
     private SurfaceHolder ourHolder;
     private volatile boolean playing;
-    private float gameSpeed = -100;
+    private float gameSpeed = -1000;
     private Player player;
 
     private Background background;
@@ -47,8 +47,6 @@ public class GameView extends SurfaceView implements  Runnable {
         background = new Background(context);
         obstacles = new ArrayList<>();
         pins = new ArrayList<>();
-
-        pins.add(new Pins(context, TypePins.SHERAF, gameSpeed));
 
         screenWidth = context.getResources().getDisplayMetrics().widthPixels;
         screenHeight = context.getResources().getDisplayMetrics().heightPixels;
@@ -111,52 +109,83 @@ public class GameView extends SurfaceView implements  Runnable {
                     iterator.remove();
                 }
             }
-        }
 
-        for (Iterator<Pins> iterator = pins.iterator(); iterator.hasNext(); ) {
-            Pins pin = iterator.next();
-            pin.update(fps);
-            if (pin.getxPosition() + Pins.size < 0) {
-                iterator.remove();
+            generateRandomPin();
+            for (Iterator<Pins> iterator = pins.iterator(); iterator.hasNext(); ) {
+                Pins pin = iterator.next();
+                pin.update(fps);
+                if (pin.getxPosition() + Pins.size < 0) {
+                    iterator.remove();
+                }
             }
         }
     }
 
-    private int nbUpdate = 0;
-    private int nbUpdateBerforeGeneration = 1000;
+    private int nbUpdateObstacle = 0;
+    private int nbUpdateBerforeGenerationObstacle = 1000;
     private void generateRandomObstacle() {
         Random rn = new Random();
-        if (nbUpdate == nbUpdateBerforeGeneration) {
+        if (nbUpdateObstacle == nbUpdateBerforeGenerationObstacle) {
             if (rn.nextBoolean()) {
                 int randomSize = getRandomInt(1, 3);
 
                 switch (randomSize) {
                     case 1:
                         Log.d(TAG, "generateRandomObstacle: NEW SMALL");
-                        obstacles.add(new Obstacle(getContext(), ObstacleSize.SMALL, backgroundSpeed));
+                        obstacles.add(new Obstacle(getContext(), ObstacleSize.SMALL, gameSpeed));
                         break;
                     case 2:
                         Log.d(TAG, "generateRandomObstacle: NEW MEDIUM");
-                        obstacles.add(new Obstacle(getContext(), ObstacleSize.MEDIUM, backgroundSpeed));
+                        obstacles.add(new Obstacle(getContext(), ObstacleSize.MEDIUM, gameSpeed));
                         break;
                     case 3:
                         Log.d(TAG, "generateRandomObstacle: NEW BIG");
-                        obstacles.add(new Obstacle(getContext(), ObstacleSize.BIG, backgroundSpeed));
+                        obstacles.add(new Obstacle(getContext(), ObstacleSize.BIG, gameSpeed));
                         break;
                 }
 
-                setRandomNbUpdateBerforeGenerationDependingOnDifficulty();
-                nbUpdate = 0;
+                setRandomNbUpdateObstacleBerforeGenerationDependingOnDifficulty();
+                nbUpdateObstacle = 0;
             }
         } else {
-            nbUpdate++;
+            nbUpdateObstacle++;
         }
     }
 
-    private void setRandomNbUpdateBerforeGenerationDependingOnDifficulty() {
-        //TODO write algo pour générer random en fonction de la difficulté
-        nbUpdateBerforeGeneration = getRandomInt(75, 100);
+    private int nbUpdatePin = 0;
+    private int nbUpdateBerforeGenerationPin = 2000;
+    private void generateRandomPin() {
+        Random rn = new Random();
+        if (nbUpdatePin == nbUpdateBerforeGenerationPin) {
+            if (rn.nextBoolean()) {
+                int randomSize = getRandomInt(0, 100);
+
+                if (randomSize > 25) {
+                    Log.d(TAG, "generateRandomObstacle: NEW SMALL");
+                    pins.add(new Pins(getContext(), TypePins.OUICHE, gameSpeed));
+                } else {
+                    Log.d(TAG, "generateRandomObstacle: NEW MEDIUM");
+                    pins.add(new Pins(getContext(), TypePins.SHERAF, gameSpeed));
+                }
+
+                setRandomNbUpdatePinBerforeGenerationDependingOnDifficulty();
+                nbUpdatePin = 0;
+            }
+        } else {
+            nbUpdatePin++;
+        }
     }
+
+    private void setRandomNbUpdateObstacleBerforeGenerationDependingOnDifficulty() {
+        //TODO write algo pour générer random en fonction de la difficulté
+        nbUpdateBerforeGenerationObstacle = getRandomInt(75, 100);
+    }
+
+    private void setRandomNbUpdatePinBerforeGenerationDependingOnDifficulty() {
+        //TODO write algo pour générer random en fonction de la difficulté
+        nbUpdateBerforeGenerationPin = getRandomInt(75, 100);
+    }
+
     private int getRandomInt(int min, int max) {
         Random rn = new Random();
         return rn.nextInt(max - min + 1) + min;
