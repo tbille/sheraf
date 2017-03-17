@@ -1,8 +1,11 @@
 package com.m2dl.sheraf;
 
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,6 +29,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.Toast;
+
+import com.m2dl.sheraf.dynamics.elements.Player;
 
 import com.m2dl.sheraf.enums.LightValue;
 import com.m2dl.sheraf.sensors.LightSensor;
@@ -36,7 +42,7 @@ import com.m2dl.sheraf.views.HeroView;
 
 public class GameActivity extends Activity {
 
-    private static final int DB_SHOUT = 80;
+    private static final int DB_SHOUT = 90;
     private static final int LOW_LIGHT = 30;
     private static final int HIGH_LIGHT = 1000;
     // gameView will be the view of the game
@@ -93,8 +99,17 @@ public class GameActivity extends Activity {
             }
         });
 
+        askPermission(android.Manifest.permission.RECORD_AUDIO, new String[]{android.Manifest.permission.RECORD_AUDIO}, 1);
         mHandler = new Handler();
         mHandler.postDelayed(soundUpdater, REFRESH_SOUND_DURATION);
+    }
+
+    private void askPermission(String sensor, String[] permissions, int requestCode) {
+        if (ContextCompat.checkSelfPermission(this, sensor) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    permissions,
+                    requestCode);
+        }
     }
 
     private void handleLightEvent(int lightValue) {
@@ -117,6 +132,7 @@ public class GameActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
+        soundMeter.startRecorder();
         // Add the following line to register the Session Manager Listener onResume
         mSensorManager.registerListener(mShakeDetector, mAccelerometer,	SensorManager.SENSOR_DELAY_UI);
         // Tell the gameView resume method to execute
@@ -127,7 +143,11 @@ public class GameActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-
+        try{
+            soundMeter.stopRecorder();
+        }catch(RuntimeException stopException){
+            //handle cleanup here
+        }
         mSensorManager.unregisterListener(mShakeDetector);
         // Tell the gameView pause method to execute
         gameView.pause();
@@ -138,10 +158,31 @@ public class GameActivity extends Activity {
         public void run() {
             int dbValue = ((int) soundMeter.soundDb(1));
             if(dbValue >= DB_SHOUT){
-                gameView.onShout();
+                gameView.onShout(dbValue);
             }
             mHandler.postDelayed(this, REFRESH_SOUND_DURATION);
         }
     };
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("SON", "onRequestPermissionsResult: PERMISSION ACCORDEE");
+
+                } else {
+                    Log.d("SON", "onRequestPermissionsResult: CAMERA PERMISSION REFUSEE");
+                    Toast.makeText(this, "Vous devez accepter les permissions pour continuer.", Toast.LENGTH_LONG)
+                            .show();
+                    finish();
+                }
+                return;
+            }
+        }
+    }
 
 }

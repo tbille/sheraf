@@ -2,13 +2,15 @@ package com.m2dl.sheraf.views;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.m2dl.sheraf.enums.TypePins;
 import com.m2dl.sheraf.ObstacleSize;
-import com.m2dl.sheraf.TypePins;
 import com.m2dl.sheraf.dynamics.elements.Background;
 import com.m2dl.sheraf.dynamics.elements.Player;
 import com.m2dl.sheraf.enums.LightValue;
@@ -44,6 +46,7 @@ public class GameView extends SurfaceView implements  Runnable {
         // Initialize ourHolder and paint objects
         ourHolder = getHolder();
 
+        player = new Player(context, 30, 30);
         background = new Background(context);
         obstacles = new ArrayList<>();
         pins = new ArrayList<>();
@@ -92,13 +95,15 @@ public class GameView extends SurfaceView implements  Runnable {
             for (Pins pin: pins) {
                 pin.draw(canvas);
             }
+
+            player.draw(canvas);
             // Draw everything to the screen
             ourHolder.unlockCanvasAndPost(canvas);
         }
     }
 
     private void update() {
-        Log.d(TAG, "update: " + obstacles.size());
+        player.update(fps);
         background.update(fps);
         if (fps != 0) {
             generateRandomObstacle();
@@ -216,7 +221,7 @@ public class GameView extends SurfaceView implements  Runnable {
 
             // Player has touched the screen
             case MotionEvent.ACTION_DOWN:
-
+                player.jump();
                 break;
 
             // Player has removed finger from screen
@@ -227,11 +232,16 @@ public class GameView extends SurfaceView implements  Runnable {
     }
 
     public void onShake() {
-        //player.tryEatOuiche();
+        Log.d("SENSOR", "onShout: Non parce que moi je suis un spécialiste de la ouiche lorraine");
+        player.tryEatOuiche();
     }
 
-    public void onShout() {
-        //player.setNervousBreakdown(true);
+    public void onShout(int value) {
+        if(player.isLimiteNervousBreakdown()){
+            Log.d("SENSOR", "onShout: SHOUT SHOUT LET IT ALL OUT" + value);
+            obstacles.clear();
+            player.setNervousBreakdown(false);
+        }
     }
 
     public void setLight(LightValue value) {
