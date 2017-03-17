@@ -3,27 +3,33 @@ package com.m2dl.sheraf.dynamics.elements;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.util.Log;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 
 import com.m2dl.sheraf.R;
-
-import static android.content.ContentValues.TAG;
 
 public class Background extends DynamicElement {
 
     private Bitmap bitmapSky;
 
     public Background(Context context, float xSpeed) {
-        setxPosition(0);
-        setyPosition(0);
+        super(context, 0, 0);
         setxSpeed(xSpeed);
-        BitmapFactory.Options opt = new BitmapFactory.Options();
-        opt.inMutable = true;
-        bitmapSky = BitmapFactory.decodeResource(context.getResources(), R.drawable.background, opt);
+
+        bitmapSky = BitmapFactory.decodeResource(context.getResources(), R.drawable.background);
+        bitmapSky = Bitmap.createScaledBitmap(bitmapSky, screenWidth, screenHeight, false);
 
         setCurrentFrame(bitmapSky);
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.LTGRAY);
+        canvas.drawRect(0, groundHeight, screenWidth, screenHeight, paint);
     }
 
     public void update(long fps){

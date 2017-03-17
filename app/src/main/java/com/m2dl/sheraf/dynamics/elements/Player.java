@@ -1,13 +1,14 @@
 package com.m2dl.sheraf.dynamics.elements;
 
+import android.content.Context;
 import android.graphics.Canvas;
-
-/**
- * Created by Clement on 17/03/2017.
- */
 
 public class Player extends DynamicElement {
 
+
+    public Player(Context context, float xPosition, float yPosition) {
+        super(context, xPosition, yPosition);
+    }
 
     @Override
     public void draw(Canvas canvas) {

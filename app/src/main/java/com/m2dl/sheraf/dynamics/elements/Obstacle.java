@@ -3,26 +3,21 @@ package com.m2dl.sheraf.dynamics.elements;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.Log;
 
 import com.m2dl.sheraf.ObstacleSize;
 
-import static android.content.ContentValues.TAG;
-
 public class Obstacle extends DynamicElement {
-
 
     private float width;
     private float height;
-    private Context context;
 
     public Obstacle(Context context, ObstacleSize size, float speed) {
-        this.context = context;
-        setxPosition(context.getResources().getDisplayMetrics().widthPixels + 200);
-        Log.d(TAG, "Obstacle: " + getxPosition());
-        setyPosition(groundHeight);
+        super(context);
 
-        setSize(size);
+        initSize(size);
+        
+        setxPosition(screenWidth + 200);
+        setyPosition(groundHeight - getHeight());
 
         setxSpeed(speed);
     }
@@ -47,7 +42,7 @@ public class Obstacle extends DynamicElement {
         return height;
     }
 
-    public void setSize(ObstacleSize size) {
+    public void initSize(ObstacleSize size) {
         switch (size) {
             case SMALL:
                 this.width = 100;

@@ -1,7 +1,6 @@
 package com.m2dl.sheraf.views;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -10,12 +9,13 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.m2dl.sheraf.ObstacleSize;
-import com.m2dl.sheraf.R;
+import com.m2dl.sheraf.TypePins;
 import com.m2dl.sheraf.dynamics.elements.Background;
 import com.m2dl.sheraf.dynamics.elements.Player;
 import com.m2dl.sheraf.enums.LightValue;
 import com.m2dl.sheraf.dynamics.elements.Obstacle;
+import com.m2dl.sheraf.dynamics.elements.Pins;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -29,10 +29,12 @@ public class GameView extends SurfaceView implements  Runnable {
     private Thread gameThread = null;
     private SurfaceHolder ourHolder;
     private volatile boolean playing;
-    private float backgroundSpeed = -100;
+    private float gameSpeed = -100;
     private Player player;
+
     private Background background;
     private ArrayList<Obstacle> obstacles;
+    private ArrayList<Pins> pins;
     private LightValue lightValue;
 
     public GameView(Context context) {
@@ -40,10 +42,11 @@ public class GameView extends SurfaceView implements  Runnable {
         // Initialize ourHolder and paint objects
         ourHolder = getHolder();
 
-        background = new Background(context, backgroundSpeed + 50);
+        background = new Background(context, gameSpeed + 50);
         obstacles = new ArrayList<>();
+        pins = new ArrayList<>();
 
-        obstacles.add(new Obstacle(context, ObstacleSize.SMALL, backgroundSpeed));
+        pins.add(new Pins(context, TypePins.SHERAF, gameSpeed));
 
         screenWidth = context.getResources().getDisplayMetrics().widthPixels;
         screenHeight = context.getResources().getDisplayMetrics().heightPixels;
@@ -86,7 +89,9 @@ public class GameView extends SurfaceView implements  Runnable {
             for (Obstacle obstacle: obstacles) {
                 obstacle.draw(canvas);
             }
-
+            for (Pins pin: pins) {
+                pin.draw(canvas);
+            }
             // Draw everything to the screen
             ourHolder.unlockCanvasAndPost(canvas);
         }
@@ -98,6 +103,14 @@ public class GameView extends SurfaceView implements  Runnable {
             Obstacle obstacle = iterator.next();
             obstacle.update(fps);
             if (obstacle.getxPosition() + obstacle.getWidth() < 0) {
+                iterator.remove();
+            }
+        }
+
+        for (Iterator<Pins> iterator = pins.iterator(); iterator.hasNext(); ) {
+            Pins pin = iterator.next();
+            pin.update(fps);
+            if (pin.getxPosition() + Pins.size < 0) {
                 iterator.remove();
             }
         }
