@@ -9,6 +9,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.m2dl.sheraf.dynamics.elements.TextDisplay;
 import com.m2dl.sheraf.enums.TypePins;
 import com.m2dl.sheraf.ObstacleSize;
 import com.m2dl.sheraf.dynamics.elements.Background;
@@ -27,6 +28,8 @@ public class GameView extends SurfaceView implements  Runnable {
 
     private final int screenWidth;
     private final int screenHeight;
+    private final TextDisplay text;
+    private boolean partyStarted;
     private Canvas canvas;
     private long fps;
     private long timeThisFrame;
@@ -47,6 +50,7 @@ public class GameView extends SurfaceView implements  Runnable {
         ourHolder = getHolder();
 
         player = new Player(context, 30, 30);
+        text = new TextDisplay(context, 200, 200);
         background = new Background(context, gameSpeed);
         obstacles = new ArrayList<>();
         pins = new ArrayList<>();
@@ -54,12 +58,28 @@ public class GameView extends SurfaceView implements  Runnable {
         screenWidth = context.getResources().getDisplayMetrics().widthPixels;
         screenHeight = context.getResources().getDisplayMetrics().heightPixels;
         // Set our boolean to true - game on!
+        partyStarted = false;
         playing = true;
     }
 
     @Override
     public void run() {
-        while (playing) {
+        while (playing && !partyStarted){
+
+            // Capture the current time in milliseconds in startFrameTime
+            long startFrameTime = System.currentTimeMillis();
+            // Draw the frame
+            draw();
+
+            // Calculate the fps this frame
+            // We can then use the result to
+            // time animations and more.
+            timeThisFrame = System.currentTimeMillis() - startFrameTime;
+            if (timeThisFrame > 0) {
+                fps = 1000 / timeThisFrame;
+            }
+        }
+        while (playing && partyStarted) {
 
             // Capture the current time in milliseconds in startFrameTime
             long startFrameTime = System.currentTimeMillis();
@@ -97,6 +117,10 @@ public class GameView extends SurfaceView implements  Runnable {
             }
 
             player.draw(canvas);
+
+            if(!partyStarted){
+                text.draw(canvas);
+            }
             // Draw everything to the screen
             ourHolder.unlockCanvasAndPost(canvas);
         }
@@ -246,6 +270,9 @@ public class GameView extends SurfaceView implements  Runnable {
 
             // Player has removed finger from screen
             case MotionEvent.ACTION_UP:
+                if (!partyStarted) {
+                    partyStarted = true;
+                }
                 break;
         }
         return true;
