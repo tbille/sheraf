@@ -19,7 +19,7 @@ public class DynamicElement extends Drawable {
     private float ySpeed = 0;
     protected Context context;
 
-    public static float groundHeight = 600f;
+    public static float groundHeight = 100f;
 
     public DynamicElement(Context context, float xPosition, float yPosition) {
         this.context = context;

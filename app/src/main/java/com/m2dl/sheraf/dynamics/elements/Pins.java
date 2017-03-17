@@ -22,7 +22,7 @@ public class Pins extends DynamicElement {
         this.typePins = typePins;
 
         setxPosition(screenWidth + 200);
-        setyPosition(groundHeight - size);
+        setyPosition(screenHeight - groundHeight - size);
         setxSpeed(speed);
 
         Bitmap icon = null;

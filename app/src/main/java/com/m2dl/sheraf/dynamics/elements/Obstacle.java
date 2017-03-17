@@ -17,7 +17,7 @@ public class Obstacle extends DynamicElement {
         initSize(size);
         
         setxPosition(screenWidth + 200);
-        setyPosition(groundHeight - getHeight());
+        setyPosition(screenHeight - groundHeight - getHeight());
 
         setxSpeed(speed);
     }
