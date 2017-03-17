@@ -188,7 +188,7 @@ public class GameView extends SurfaceView implements  Runnable {
             if (rn.nextBoolean()) {
                 int randomSize = getRandomInt(0, 100);
 
-                if (randomSize > 25) {
+                if (randomSize > 10) {
                     pins.add(new Pins(getContext(), TypePins.OUICHE, pinSpeed));
                 } else {
                     pins.add(new Pins(getContext(), TypePins.SHERAF, pinSpeed));
