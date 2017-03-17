@@ -2,13 +2,12 @@ package com.m2dl.sheraf.views;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.m2dl.sheraf.ObstacleSize;
 import com.m2dl.sheraf.TypePins;
 import com.m2dl.sheraf.dynamics.elements.Background;
 import com.m2dl.sheraf.dynamics.elements.Player;
@@ -18,6 +17,9 @@ import com.m2dl.sheraf.dynamics.elements.Pins;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
+
+import static android.content.ContentValues.TAG;
 
 public class GameView extends SurfaceView implements  Runnable {
 
@@ -98,12 +100,16 @@ public class GameView extends SurfaceView implements  Runnable {
     }
 
     private void update() {
+        Log.d(TAG, "update: " + obstacles.size());
         background.update(fps);
-        for (Iterator<Obstacle> iterator = obstacles.iterator(); iterator.hasNext(); ) {
-            Obstacle obstacle = iterator.next();
-            obstacle.update(fps);
-            if (obstacle.getxPosition() + obstacle.getWidth() < 0) {
-                iterator.remove();
+        if (fps != 0) {
+            generateRandomObstacle();
+            for (Iterator<Obstacle> iterator = obstacles.iterator(); iterator.hasNext(); ) {
+                Obstacle obstacle = iterator.next();
+                obstacle.update(fps);
+                if (obstacle.getxPosition() + obstacle.getWidth() < 0) {
+                    iterator.remove();
+                }
             }
         }
 
@@ -114,6 +120,46 @@ public class GameView extends SurfaceView implements  Runnable {
                 iterator.remove();
             }
         }
+    }
+
+    private int nbUpdate = 0;
+    private int nbUpdateBerforeGeneration = 1000;
+    private void generateRandomObstacle() {
+        Random rn = new Random();
+        if (nbUpdate == nbUpdateBerforeGeneration) {
+            if (rn.nextBoolean()) {
+                int randomSize = getRandomInt(1, 3);
+
+                switch (randomSize) {
+                    case 1:
+                        Log.d(TAG, "generateRandomObstacle: NEW SMALL");
+                        obstacles.add(new Obstacle(getContext(), ObstacleSize.SMALL, backgroundSpeed));
+                        break;
+                    case 2:
+                        Log.d(TAG, "generateRandomObstacle: NEW MEDIUM");
+                        obstacles.add(new Obstacle(getContext(), ObstacleSize.MEDIUM, backgroundSpeed));
+                        break;
+                    case 3:
+                        Log.d(TAG, "generateRandomObstacle: NEW BIG");
+                        obstacles.add(new Obstacle(getContext(), ObstacleSize.BIG, backgroundSpeed));
+                        break;
+                }
+
+                setRandomNbUpdateBerforeGenerationDependingOnDifficulty();
+                nbUpdate = 0;
+            }
+        } else {
+            nbUpdate++;
+        }
+    }
+
+    private void setRandomNbUpdateBerforeGenerationDependingOnDifficulty() {
+        //TODO write algo pour générer random en fonction de la difficulté
+        nbUpdateBerforeGeneration = getRandomInt(75, 100);
+    }
+    private int getRandomInt(int min, int max) {
+        Random rn = new Random();
+        return rn.nextInt(max - min + 1) + min;
     }
 
     public void pause() {
