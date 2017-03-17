@@ -12,152 +12,240 @@ import android.view.View;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class GameActivity extends AppCompatActivity {
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+import com.m2dl.sheraf.views.HeroView;
 
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
-    private View mContentView;
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            // Delayed removal of status and navigation bar
+public class GameActivity extends Activity {
 
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        }
-    };
-    private View mControlsView;
-    private final Runnable mShowPart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
-            }
-            mControlsView.setVisibility(View.VISIBLE);
-        }
-    };
-    private boolean mVisible;
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
-        }
-    };
+    // gameView will be the view of the game
+    // It will also hold the logic of the game
+    // and respond to screen touches as well
+    GameView gameView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_game);
+        // Initialize gameView and set it as the view
+        gameView = new GameView(this);
+        setContentView(gameView);
 
-        mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.fullscreen_content);
+    }
 
+    // GameView class will go here
 
-        // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
+    // Here is our implementation of GameView
+    // It is an inner class.
+    // Note how the final closing curly brace }
+    // is inside SimpleGameEngine
+
+    // Notice we implement runnable so we have
+    // A thread and can override the run method.
+    class GameView extends SurfaceView implements Runnable {
+
+        // This is our thread
+        Thread gameThread = null;
+
+        // This is new. We need a SurfaceHolder
+        // When we use Paint and Canvas in a thread
+        // We will see it in action in the draw method soon.
+        SurfaceHolder ourHolder;
+
+        // A boolean which we will set and unset
+        // when the game is running- or not.
+        volatile boolean playing;
+
+        // A Canvas and a Paint object
+        Canvas canvas;
+        Paint paint;
+
+        HeroView player;
+
+        // This variable tracks the game frame rate
+        long fps;
+
+        // This is used to help calculate the fps
+        private long timeThisFrame;
+
+        // Declare an object of type Bitmap
+        Bitmap bitmapBob;
+
+        // Bob starts off not moving
+        boolean isMoving = false;
+
+        // He can walk at 150 pixels per second
+        float walkSpeedPerSecond = 150;
+
+        // He starts 10 pixels from the left
+        float bobXPosition = 10;
+
+        // When the we initialize (call new()) on gameView
+        // This special constructor method runs
+        public GameView(Context context) {
+            // The next line of code asks the
+            // SurfaceView class to set up our object.
+            // How kind.
+            super(context);
+
+            // Initialize ourHolder and paint objects
+            ourHolder = getHolder();
+            paint = new Paint();
+
+            player = new HeroView(this);
+            // Load Bob from his .png file
+            bitmapBob = BitmapFactory.decodeResource(this.getResources(), R.drawable.bob);
+
+            // Set our boolean to true - game on!
+            playing = true;
+
+        }
+
+        @Override
+        public void run() {
+            while (playing) {
+
+                // Capture the current time in milliseconds in startFrameTime
+                long startFrameTime = System.currentTimeMillis();
+
+                // Update the frame
+                update();
+
+                // Draw the frame
+                draw();
+
+                // Calculate the fps this frame
+                // We can then use the result to
+                // time animations and more.
+                timeThisFrame = System.currentTimeMillis() - startFrameTime;
+                if (timeThisFrame > 0) {
+                    fps = 1000 / timeThisFrame;
+                }
+
             }
-        });
 
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        }
+
+        // Everything that needs to be updated goes in here
+        // In later projects we will have dozens (arrays) of objects.
+        // We will also do other things like collision detection.
+        public void update() {
+
+            // If bob is moving (the player is touching the screen)
+            // then move him to the right based on his target speed and the current fps.
+            if(isMoving){
+                player.update(fps);
+            }
+
+        }
+
+        // Draw the newly updated scene
+        public void draw() {
+
+            // Make sure our drawing surface is valid or we crash
+            if (ourHolder.getSurface().isValid()) {
+                // Lock the canvas ready to draw
+                canvas = ourHolder.lockCanvas();
+
+                // Draw the background color
+                canvas.drawColor(Color.argb(255,  26, 128, 182));
+
+                // Choose the brush color for drawing
+                paint.setColor(Color.argb(255,  249, 129, 0));
+
+                // Make the text a bit bigger
+                paint.setTextSize(45);
+
+                // Display the current fps on the screen
+                canvas.drawText("FPS:" + fps, 20, 40, paint);
+
+                // Draw bob at bobXPosition, 200 pixels
+                player.draw(canvas);
+
+                // Draw everything to the screen
+                ourHolder.unlockCanvasAndPost(canvas);
+            }
+
+        }
+
+        // If SimpleGameEngine Activity is paused/stopped
+        // shutdown our thread.
+        public void pause() {
+            playing = false;
+            try {
+                gameThread.join();
+            } catch (InterruptedException e) {
+                Log.e("Error:", "joining thread");
+            }
+
+        }
+
+        // If SimpleGameEngine Activity is started then
+        // start our thread.
+        public void resume() {
+            playing = true;
+            gameThread = new Thread(this);
+            gameThread.start();
+        }
+
+        // The SurfaceView class implements onTouchListener
+        // So we can override this method and detect screen touches.
+        @Override
+        public boolean onTouchEvent(MotionEvent motionEvent) {
+
+            switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
+
+                // Player has touched the screen
+                case MotionEvent.ACTION_DOWN:
+
+                    // Set isMoving so Bob is moved in the update method
+                    isMoving = true;
+
+                    break;
+
+                // Player has removed finger from screen
+                case MotionEvent.ACTION_UP:
+
+                    // Set isMoving so Bob does not move
+                    isMoving = false;
+
+                    break;
+            }
+            return true;
+        }
+
     }
+    // This is the end of our GameView inner class
 
+    // More SimpleGameEngine methods will go here
+
+    // This method executes when the player starts the game
     @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
+    protected void onResume() {
+        super.onResume();
 
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100);
+        // Tell the gameView resume method to execute
+        gameView.resume();
     }
 
-    private void toggle() {
-        if (mVisible) {
-            hide();
-        } else {
-            show();
-        }
+    // This method executes when the player quits the game
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Tell the gameView pause method to execute
+        gameView.pause();
     }
 
-    private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
-        mControlsView.setVisibility(View.GONE);
-        mVisible = false;
-
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    @SuppressLint("InlinedApi")
-    private void show() {
-        // Show the system bar
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
-
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    /**
-     * Schedules a call to hide() in [delay] milliseconds, canceling any
-     * previously scheduled calls.
-     */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
-    }
 }
