@@ -3,6 +3,8 @@ package com.m2dl.sheraf.dynamics.elements;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.m2dl.sheraf.R;
@@ -17,15 +19,16 @@ public class Background extends DynamicElement {
         setxPosition(0);
         setyPosition(0);
         setxSpeed(xSpeed);
-        bitmapSky = BitmapFactory.decodeResource(context.getResources(), R.drawable.background);
+        BitmapFactory.Options opt = new BitmapFactory.Options();
+        opt.inMutable = true;
+        bitmapSky = BitmapFactory.decodeResource(context.getResources(), R.drawable.background, opt);
+
         setCurrentFrame(bitmapSky);
     }
 
     public void update(long fps){
-        Log.d(TAG, "update: " + fps);
-        Log.d(TAG, "update: getxPosition " + getxPosition());
-        if (fps != 0) {
+       /* if (fps != 0) {
             setxPosition(getxPosition() + (getxSpeed() / fps));
-        }
+        }*/
     }
 }
