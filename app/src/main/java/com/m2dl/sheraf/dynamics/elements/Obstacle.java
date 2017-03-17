@@ -52,10 +52,6 @@ public class Obstacle extends DynamicElement {
                 this.width = 100;
                 this.height = 200;
                 break;
-            case BIG:
-                this.width = 100;
-                this.height = 300;
-                break;
         }
     }
 }

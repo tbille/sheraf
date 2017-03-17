@@ -7,23 +7,24 @@ import android.graphics.BitmapFactory;
 import com.m2dl.sheraf.R;
 import com.m2dl.sheraf.enums.TypePins;
 
-/**
- * Created by Clement on 17/03/2017.
- */
+import java.util.Random;
 
 public class Pins extends DynamicElement {
 
     public static int size = 60;
     private TypePins typePins;
 
-    public Pins(Context context, TypePins typePins, float speed) {
+    public Pins(Context context, TypePins typePins, float baseSpeed) {
         super(context);
 
         this.typePins = typePins;
 
+        int rand = getRandomInt(250, 400);
+        int randSpeed = getRandomInt(200, 500);
+
         setxPosition(screenWidth + 200);
-        setyPosition(screenHeight - groundHeight - size);
-        setxSpeed(speed);
+        setyPosition(screenHeight - groundHeight - rand - size);
+        setxSpeed(baseSpeed + randSpeed);
 
         Bitmap icon = null;
 
@@ -43,6 +44,11 @@ public class Pins extends DynamicElement {
         if (fps != 0) {
             setxPosition(getxPosition() + (getxSpeed() / fps));
         }
+    }
+
+    private int getRandomInt(int min, int max) {
+        Random rn = new Random();
+        return rn.nextInt(max - min + 1) + min;
     }
 
     public TypePins getType() {
