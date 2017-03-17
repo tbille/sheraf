@@ -44,7 +44,7 @@ public class GameView extends SurfaceView implements  Runnable {
         // Initialize ourHolder and paint objects
         ourHolder = getHolder();
 
-        background = new Background(context, gameSpeed + 50);
+        background = new Background(context);
         obstacles = new ArrayList<>();
         pins = new ArrayList<>();
 
