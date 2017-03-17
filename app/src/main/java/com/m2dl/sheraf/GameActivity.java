@@ -1,6 +1,5 @@
 package com.m2dl.sheraf;
 
-import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -8,12 +7,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.MotionEvent;
-import android.view.View;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -21,28 +16,13 @@ import android.view.View;
  */
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.widget.Toast;
 
-import com.m2dl.sheraf.dynamics.elements.Player;
-
 import com.m2dl.sheraf.enums.LightValue;
-import com.m2dl.sheraf.sensors.LightSensor;
 import com.m2dl.sheraf.sensors.ShakeDetector;
 import com.m2dl.sheraf.sensors.SoundMeter;
 import com.m2dl.sheraf.views.GameView;
-import com.m2dl.sheraf.views.HeroView;
-
-import static android.content.ContentValues.TAG;
 
 public class GameActivity extends Activity {
 
