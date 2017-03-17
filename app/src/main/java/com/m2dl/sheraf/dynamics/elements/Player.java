@@ -23,10 +23,18 @@ public class Player extends DynamicElement {
     private float ground;
     private boolean nervousBreakdownReady;
 
+
+    private float width = 100;
+    private float height = 100;
+
     public Player(Context context, float xPosition, float yPosition) {
         super(context, xPosition, yPosition);
         jumpingSprite = BitmapFactory.decodeResource(context.getResources(), R.drawable.player_jumping);
         standingSprite = BitmapFactory.decodeResource(context.getResources(), R.drawable.player_standing);
+
+        jumpingSprite = Bitmap.createScaledBitmap(jumpingSprite, (int) width, (int) height, false);
+        standingSprite = Bitmap.createScaledBitmap(standingSprite, (int) width, (int) height, false);
+
         ground = screenHeight - groundHeight - standingSprite.getHeight();
         setyPosition(ground);
         isJumping = false;
@@ -105,5 +113,33 @@ public class Player extends DynamicElement {
 
     public boolean isLimiteNervousBreakdown(){
         return isLimiteNervousBreakdown;
+    }
+
+
+    public float getWidth() {
+        return width;
+    }
+
+    public float getHeight() {
+        return height;
+    }
+
+
+    public boolean touchObstacle(Obstacle obstacle) {
+        return checkHitBox(obstacle.getxPosition(), obstacle.getyPosition(), obstacle.getWidth(), obstacle.getHeight());
+    }
+
+    public boolean touchPins(Pins pin) {
+        return checkHitBox(pin.getxPosition(), pin.getyPosition(), pin.size, pin.size);
+    }
+
+    private boolean checkHitBox(float x, float y, float width, float height) {
+        if (x > getxPosition() + getWidth() || x + width < getxPosition()) {
+            return false;
+        }
+        if (y > getyPosition() + getHeight() || y + height < getyPosition()) {
+            return false;
+        }
+        return true;
     }
 }

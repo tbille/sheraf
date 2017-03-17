@@ -123,7 +123,35 @@ public class GameView extends SurfaceView implements  Runnable {
                     iterator.remove();
                 }
             }
+
+            checkHitBox();
         }
+    }
+
+    private void checkHitBox() {
+
+
+        for (Iterator<Obstacle> iterator = obstacles.iterator(); iterator.hasNext(); ) {
+            Obstacle obstacle = iterator.next();
+            if (player.touchObstacle(obstacle)) {
+                Log.d(TAG, "checkHitBox: Obstacle touched");
+                //iterator.remove();
+                looseGame();
+            }
+        }
+
+        for (Iterator<Pins> iterator = pins.iterator(); iterator.hasNext(); ) {
+            Pins pin = iterator.next();
+            if (player.touchPins(pin)) {
+                player.pickupPins(pin);
+                Log.d(TAG, "checkHitBox: Pin touched");
+                iterator.remove();
+            }
+        }
+    }
+
+    private void looseGame() {
+        playing = false;
     }
 
     private int nbUpdateObstacle = 0;
@@ -136,11 +164,9 @@ public class GameView extends SurfaceView implements  Runnable {
 
                 switch (randomSize) {
                     case 1:
-                        Log.d(TAG, "generateRandomObstacle: NEW SMALL");
                         obstacles.add(new Obstacle(getContext(), ObstacleSize.SMALL, gameSpeed));
                         break;
                     case 2:
-                        Log.d(TAG, "generateRandomObstacle: NEW MEDIUM");
                         obstacles.add(new Obstacle(getContext(), ObstacleSize.MEDIUM, gameSpeed));
                         break;
                 }
@@ -162,10 +188,8 @@ public class GameView extends SurfaceView implements  Runnable {
                 int randomSize = getRandomInt(0, 100);
 
                 if (randomSize > 25) {
-                    Log.d(TAG, "generateRandomObstacle: NEW SMALL");
                     pins.add(new Pins(getContext(), TypePins.OUICHE, gameSpeed));
                 } else {
-                    Log.d(TAG, "generateRandomObstacle: NEW MEDIUM");
                     pins.add(new Pins(getContext(), TypePins.SHERAF, gameSpeed));
                 }
 
