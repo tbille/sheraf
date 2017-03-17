@@ -3,24 +3,24 @@ package com.m2dl.sheraf.dynamics.elements;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
-
-/**
- * Created by Clement on 17/03/2017.
- */
 
 public abstract class DynamicElement extends Drawable {
 
     private Bitmap currentFrame;
-    float xPosition;
-    float xSpeed;
-    float yPosition;
-    float ySpeed;
+    private float xPosition;
+    private float xSpeed;
+    private float yPosition;
+    private float ySpeed;
+
+    public static float groundHeight = 10f;
 
     @Override
     public void draw(Canvas canvas) {
-
+        Paint paint = new Paint();
+        canvas.drawBitmap(currentFrame, getxPosition(), getyPosition(), paint);
     }
 
     public void update(long fps){
@@ -41,8 +41,6 @@ public abstract class DynamicElement extends Drawable {
     public int getOpacity() {
         return PixelFormat.OPAQUE;
     }
-
-
 
     protected float getxPosition() {
         return xPosition;
