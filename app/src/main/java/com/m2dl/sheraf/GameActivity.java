@@ -3,6 +3,8 @@ package com.m2dl.sheraf;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -40,6 +42,8 @@ import com.m2dl.sheraf.sensors.SoundMeter;
 import com.m2dl.sheraf.views.GameView;
 import com.m2dl.sheraf.views.HeroView;
 
+import static android.content.ContentValues.TAG;
+
 public class GameActivity extends Activity {
 
     private static final int DB_SHOUT = 90;
@@ -60,7 +64,6 @@ public class GameActivity extends Activity {
     private ShakeDetector mShakeDetector;
 
     private Sensor mLight;
-    private LightSensor mLightSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,14 +93,19 @@ public class GameActivity extends Activity {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mLight = mSensorManager
                 .getDefaultSensor(Sensor.TYPE_LIGHT);
-        mLightSensor = new LightSensor();
-        mLightSensor.setOnLightChangedListener(new LightSensor.OnLightChangedListener() {
-
+        mSensorManager.registerListener(new SensorEventListener() {
             @Override
-            public void onLightChanged (int lightValue) {
+            public void onSensorChanged(SensorEvent event) {
+                int lightValue = (int) event.values[0];
+
                 handleLightEvent(lightValue);
             }
-        });
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+            }
+        }, mLight, SensorManager.SENSOR_DELAY_NORMAL);
 
         askPermission(android.Manifest.permission.RECORD_AUDIO, new String[]{android.Manifest.permission.RECORD_AUDIO}, 1);
     }

@@ -33,13 +33,14 @@ public class GameView extends SurfaceView implements  Runnable {
     private Thread gameThread = null;
     private SurfaceHolder ourHolder;
     private volatile boolean playing;
-    private float gameSpeed = -1000;
+    private float obstacleSpeed = -1000;
+    private float pinSpeed = -1000;
     private Player player;
 
     private Background background;
     private ArrayList<Obstacle> obstacles;
     private ArrayList<Pins> pins;
-    private LightValue lightValue;
+    private LightValue lightValue = LightValue.LOW;
 
     public GameView(Context context) {
         super(context);
@@ -47,7 +48,7 @@ public class GameView extends SurfaceView implements  Runnable {
         ourHolder = getHolder();
 
         player = new Player(context, 30, 30);
-        background = new Background(context, gameSpeed);
+        background = new Background(context, obstacleSpeed);
         obstacles = new ArrayList<>();
         pins = new ArrayList<>();
 
@@ -164,10 +165,10 @@ public class GameView extends SurfaceView implements  Runnable {
 
                 switch (randomSize) {
                     case 1:
-                        obstacles.add(new Obstacle(getContext(), ObstacleSize.SMALL, gameSpeed));
+                        obstacles.add(new Obstacle(getContext(), ObstacleSize.SMALL, obstacleSpeed));
                         break;
                     case 2:
-                        obstacles.add(new Obstacle(getContext(), ObstacleSize.MEDIUM, gameSpeed));
+                        obstacles.add(new Obstacle(getContext(), ObstacleSize.MEDIUM, obstacleSpeed));
                         break;
                 }
 
@@ -188,9 +189,9 @@ public class GameView extends SurfaceView implements  Runnable {
                 int randomSize = getRandomInt(0, 100);
 
                 if (randomSize > 25) {
-                    pins.add(new Pins(getContext(), TypePins.OUICHE, gameSpeed));
+                    pins.add(new Pins(getContext(), TypePins.OUICHE, pinSpeed));
                 } else {
-                    pins.add(new Pins(getContext(), TypePins.SHERAF, gameSpeed));
+                    pins.add(new Pins(getContext(), TypePins.SHERAF, pinSpeed));
                 }
 
                 setRandomNbUpdatePinBerforeGenerationDependingOnDifficulty();
@@ -203,12 +204,35 @@ public class GameView extends SurfaceView implements  Runnable {
 
     private void setRandomNbUpdateObstacleBerforeGenerationDependingOnDifficulty() {
         //TODO write algo pour générer random en fonction de la difficulté
-        nbUpdateBerforeGenerationObstacle = getRandomInt(75, 100);
+        switch (lightValue) {
+            case LOW :
+                nbUpdateBerforeGenerationObstacle = getRandomInt(75, 100);
+                obstacleSpeed = -2000;
+                break;
+            case MEDIUM :
+                nbUpdateBerforeGenerationObstacle = getRandomInt(75, 100);
+                obstacleSpeed = -1500;
+                break;
+            case HIGH :
+                nbUpdateBerforeGenerationObstacle = getRandomInt(75, 100);
+                obstacleSpeed = -1000;
+                break;
+        }
     }
 
     private void setRandomNbUpdatePinBerforeGenerationDependingOnDifficulty() {
         //TODO write algo pour générer random en fonction de la difficulté
-        nbUpdateBerforeGenerationPin = getRandomInt(75, 100);
+        switch (lightValue) {
+            case HIGH :
+                nbUpdateBerforeGenerationPin = getRandomInt(75, 100);
+                break;
+            case MEDIUM :
+                nbUpdateBerforeGenerationPin = getRandomInt(100, 200);
+                break;
+            case LOW :
+                nbUpdateBerforeGenerationPin = getRandomInt(200, 400);
+                break;
+        }
     }
 
     private int getRandomInt(int min, int max) {
@@ -260,6 +284,8 @@ public class GameView extends SurfaceView implements  Runnable {
         if(player.isLimiteNervousBreakdown()){
             Log.d("SENSOR", "onShout: SHOUT SHOUT LET IT ALL OUT" + value);
             obstacles.clear();
+            setRandomNbUpdateObstacleBerforeGenerationDependingOnDifficulty();
+            nbUpdateBerforeGenerationObstacle+=500;
             player.setNervousBreakdown(false);
         }
     }
