@@ -15,7 +15,7 @@ public abstract class DynamicElement extends Drawable {
     private float yPosition;
     private float ySpeed;
 
-    public static float groundHeight = 10f;
+    public static float groundHeight = 500f;
 
     @Override
     public void draw(Canvas canvas) {
@@ -42,7 +42,7 @@ public abstract class DynamicElement extends Drawable {
         return PixelFormat.OPAQUE;
     }
 
-    protected float getxPosition() {
+    public float getxPosition() {
         return xPosition;
     }
 
@@ -58,7 +58,7 @@ public abstract class DynamicElement extends Drawable {
         this.xSpeed = xSpeed;
     }
 
-    protected float getyPosition() {
+    public float getyPosition() {
         return yPosition;
     }
 
