@@ -132,7 +132,7 @@ public class GameView extends SurfaceView implements  Runnable {
         Random rn = new Random();
         if (nbUpdateObstacle == nbUpdateBerforeGenerationObstacle) {
             if (rn.nextBoolean()) {
-                int randomSize = getRandomInt(1, 3);
+                int randomSize = getRandomInt(1, 2);
 
                 switch (randomSize) {
                     case 1:
@@ -142,10 +142,6 @@ public class GameView extends SurfaceView implements  Runnable {
                     case 2:
                         Log.d(TAG, "generateRandomObstacle: NEW MEDIUM");
                         obstacles.add(new Obstacle(getContext(), ObstacleSize.MEDIUM, gameSpeed));
-                        break;
-                    case 3:
-                        Log.d(TAG, "generateRandomObstacle: NEW BIG");
-                        obstacles.add(new Obstacle(getContext(), ObstacleSize.BIG, gameSpeed));
                         break;
                 }
 
@@ -158,7 +154,7 @@ public class GameView extends SurfaceView implements  Runnable {
     }
 
     private int nbUpdatePin = 0;
-    private int nbUpdateBerforeGenerationPin = 2000;
+    private int nbUpdateBerforeGenerationPin = 1500;
     private void generateRandomPin() {
         Random rn = new Random();
         if (nbUpdatePin == nbUpdateBerforeGenerationPin) {
